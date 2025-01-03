@@ -44,7 +44,7 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
             ParamsInfo = new ParamInfo[3];
             ParamsInfo[0] = new ParamInfo("a1", "controls the exploration quantity", -10, 10);
             ParamsInfo[1] = new ParamInfo("gp", "controls the participation probability of concentration updating by the generation rate", 0.0, 1.0);
-            ParamsInfo[1] = new ParamInfo("a2", "controls the exploitation feature", -10, 10);
+            ParamsInfo[2] = new ParamInfo("a2", "controls the exploitation feature", -10, 10);
 
         }
 

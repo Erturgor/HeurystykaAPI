@@ -1,6 +1,7 @@
 ﻿using Heurystyka.Domain;
 using Heurystyka.Domain.Wymagania;
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +24,6 @@ namespace Heurystyka.Application
                 var domain = request.domain[index];
 
                 List<IEnumerable<double>> paramRange= new List<IEnumerable<double>>();
-                var combinations = GetCartesianProduct(paramRange);
                 for (var i = 0; i < request.ParameterRanges.Count; i++)
                 {
                     List<double> par = new List<double>();
@@ -33,7 +33,9 @@ namespace Heurystyka.Application
                     }
                     paramRange.Add(par);
                 }
-                foreach (var combination in combinations)
+                var cartesianProduct = CartesianProduct(paramRange);
+
+                foreach (var combination in cartesianProduct)
                 {
                     var algorithm = OptionsService.GetAlgorithms()[request.AlgorithmName];
                     var result = await Task.Run(() => algorithm.Solve(
@@ -55,19 +57,22 @@ namespace Heurystyka.Application
             return reports;
         }
 
-        static IEnumerable<IEnumerable<double>> GetCartesianProduct(List<IEnumerable<double>> sets)
+        static IEnumerable<IEnumerable<double>> CartesianProduct(List<IEnumerable<double>> sets)
         {
-            IEnumerable<IEnumerable<double>> product = new[] { Enumerable.Empty<double>() };
-
-            foreach (var set in sets)
+            // Base case: If only one set is left, return it
+            if (sets.Count == 1)
             {
-                product = product.SelectMany(
-                    prefix => set,
-                    (prefix, item) => prefix.Concat(new[] { item })
-                );
+                return sets[0].Select(item => new[] { item });
             }
 
-            return product;
+            // Recursive step: Take the first set and combine it with the Cartesian product of the rest
+            var firstSet = sets[0];
+            var restProduct = CartesianProduct(sets.Skip(1).ToList());
+
+            return firstSet.SelectMany(
+                item => restProduct,
+                (item, rest) => new[] { item }.Concat(rest)
+            );
         }
 
         static double[,] ConvertTo2DArray(double[][] jagged)
