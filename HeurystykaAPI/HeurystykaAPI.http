@@ -1,0 +1,6 @@
+@HeurystykaAPI_HostAddress = http://localhost:5107
+
+GET {{HeurystykaAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
