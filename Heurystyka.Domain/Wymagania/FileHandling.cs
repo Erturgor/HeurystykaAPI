@@ -38,7 +38,7 @@ namespace Heurystyka.Domain.Wymagania
         public int Iteration { get; set; }
         public double[] Fitnesses { get; set; }
         public double[] parameters { get; set; }
-        public List<double[]> Hive { get; set; }
+        public List<double[]> Hive { get; set; } =new List<double[]>();
         public int NumberOfEvaluationFitnessFunction { get; set; }
     }
 }

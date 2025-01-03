@@ -33,7 +33,7 @@ namespace Heurystyka.Application
                 }
                 var result = await Task.Run(() => algorithm.Solve(
                         fitnessFunction,
-                        request.domain,
+                        ConvertTo2DArray(request.domain),
                         request.Size,
                         request.Iteration,
                         request.Dimensions,
@@ -46,6 +46,23 @@ namespace Heurystyka.Application
                 }
             }
             return reports;
+        }
+        static double[,] ConvertTo2DArray(double[][] jagged)
+        {
+            int rows = jagged.Length;
+            int cols = jagged[0].Length;
+
+            double[,] result = new double[rows, cols];
+
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    result[i, j] = jagged[i][j];
+                }
+            }
+
+            return result;
         }
     }
 }

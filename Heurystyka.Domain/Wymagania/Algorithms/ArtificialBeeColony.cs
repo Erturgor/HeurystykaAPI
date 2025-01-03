@@ -96,7 +96,7 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
             {
                 double[] bee = new double[dimensions];
                 for (int j = 0; j < dimensions; j++)
-                    bee[j] = domain[0, j] + rd.NextDouble() * (domain[1, j] - domain[0, j]);
+                    bee[j] = domain[j, 0] + rd.NextDouble() * (domain[j, 1] - domain[j, 0]);
                 bees.Add(bee);
                 fitnesses[i] = fitness(bees[i]);
                 trial[i] = 0;
@@ -124,7 +124,7 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
             {
                 double phi = random.NextDouble() * 2 - 1; // Random number in [-1, 1]
                 solution[j] = bees[i][j] + phi * (bees[i][j] - bees[k][j]);
-                solution[j] = Math.Max(domain[0, j], Math.Min(domain[1, j], solution[j]));
+                solution[j] = Math.Max(domain[j, 0], Math.Min(domain[j, 1], solution[j]));
             }
 
             return solution;
@@ -192,7 +192,7 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
                 if (trial[i] > size * dimensions)
                 {
                     for (int j = 0; j < dimensions; j++)
-                        bees[i][j] = domain[0, j] + random.NextDouble() * (domain[1, j] - domain[0, j]);
+                        bees[i][j] = domain[j, 0] + random.NextDouble() * (domain[j, 1] - domain[j, 0]);
 
                     fitnesses[i] = fitness(bees[i]);
                     trial[i] = 0;

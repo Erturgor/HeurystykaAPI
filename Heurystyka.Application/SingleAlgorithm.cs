@@ -27,7 +27,7 @@ namespace Heurystyka.Application
                 for (var i = 0; i < request.ParameterRanges.Count; i++)
                 {
                     List<double> par = new List<double>();
-                    for (var x = request.ParameterRanges[i][0]; x < request.ParameterRanges[i][1]; x += request.ParameterRanges[i][2])
+                    for (var x = request.ParameterRanges[i][0]; x <= request.ParameterRanges[i][1]; x += request.ParameterRanges[i][2])
                     {
                         par.Add(x);
                     }
@@ -38,7 +38,7 @@ namespace Heurystyka.Application
                     var algorithm = OptionsService.GetAlgorithms()[request.AlgorithmName];
                     var result = await Task.Run(() => algorithm.Solve(
                         fitnessFunction,
-                        domain,
+                        ConvertTo2DArray(domain),
                         request.Size,
                         request.Iteration,
                         request.Dimensions,
@@ -70,6 +70,23 @@ namespace Heurystyka.Application
             return product;
         }
 
+        static double[,] ConvertTo2DArray(double[][] jagged)
+        {
+            int rows = jagged.Length;
+            int cols = jagged[0].Length;
+
+            double[,] result = new double[rows, cols];
+
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    result[i, j] = jagged[i][j];
+                }
+            }
+
+            return result;
+        }
     }
 
 }

@@ -31,8 +31,8 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
         double a2 { get; set; } = 1;
         double GP { get; set; } = 0.5;
         public ParamInfo[] ParamsInfo { get; set; } 
-        public IStateWriter writer { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public IStateReader reader { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public IStateWriter writer { get; set; } = new EquilibrumWriter();
+        public IStateReader reader { get; set; } = new EquilibrumStateReader();
 
 
         int currentIteration;
@@ -119,7 +119,7 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
                 double[] particle = new double[dimensions];
                 for (int j = 0; j < dimensions; j++)
                 {
-                    particle[j] = domain[0, j] + rd.NextDouble() * (domain[1, j] - domain[0, j]);
+                    particle[j] = domain[j, 0] + rd.NextDouble() * (domain[j, 1] - domain[j, 0]);
                 }
                 particles.Add(particle);
             }
@@ -302,7 +302,7 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
                         G0[k] = generationControlParameter[k] * (Ceq[k] - lamda[k] * particles[j][k]);
                         G[k] = G0[k] * F[k];
                         var temp = Ceq[k] + (particles[j][k] - Ceq[k]) * F[k] + G[k] * (1 - F[k]);
-                        particles[j][k] = Math.Max(domain[0,k], Math.Min(domain[1, k], temp));
+                        particles[j][k] = Math.Max(domain[k,0], Math.Min(domain[k, 1], temp));
 
                     }
                 }
