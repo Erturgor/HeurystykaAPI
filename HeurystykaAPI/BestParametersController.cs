@@ -17,7 +17,12 @@ namespace HeurystykaAPI
         [HttpGet]
         public async Task<ActionResult<AlgorithmResult>> GetParameters(string name)
         {
-            return await dataContext.AlgorithmResults.FirstOrDefaultAsync(ar => ar.AlgorithmName == name);
+            var result = await dataContext.AlgorithmResults.Include(ar => ar.Parameters).FirstOrDefaultAsync(ar => ar.AlgorithmName == name);
+            if (result == null)
+            {
+                return NotFound("Algorithm result not found.");
+            }
+            return Ok(result);
         }
 
         [HttpPost]
@@ -38,7 +43,7 @@ namespace HeurystykaAPI
                 foreach (var updatedParameter in newResult.Parameters)
                 {
                     var existingParameter = existingResult.Parameters
-                        .FirstOrDefault(p => p.Id == updatedParameter.Id);
+                        .FirstOrDefault(p => p.ParameterName == updatedParameter.ParameterName);
 
                     if (existingParameter != null)
                     {
@@ -57,8 +62,21 @@ namespace HeurystykaAPI
             }
             else
             {
+                var newAlgorithmResult = new AlgorithmResult
+                {
+                    AlgorithmName = newResult.AlgorithmName,
+                    Parameters = new List<AlgorithmParameter>() 
+                };
 
-                dataContext.AlgorithmResults.Add(newResult);
+                foreach (var param in newResult.Parameters)
+                {
+                    newAlgorithmResult.Parameters.Add(new AlgorithmParameter
+                    {
+                        ParameterName = param.ParameterName,
+                        ParameterValue = param.ParameterValue
+                    });
+                }
+                dataContext.AlgorithmResults.Add(newAlgorithmResult);
                 await dataContext.SaveChangesAsync();
                 return Ok(); 
             }
