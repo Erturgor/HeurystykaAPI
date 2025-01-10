@@ -10,7 +10,7 @@ namespace HeurystykaAPI
         [HttpGet]
         public async Task<ActionResult<int>> GetParameters(string name)
         {
-            return OptionsService.GetAlgorithms()[name].ParamsInfo.Length;
+            return Ok(OptionsService.GetAlgorithms()[name].ParamsInfo.Length);
         }
     }
 }

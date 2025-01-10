@@ -254,7 +254,7 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
                     writeFile();
                 }
             }
-
+            FBest = f(XBest);
             return FBest;
         }
 

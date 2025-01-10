@@ -1,4 +1,5 @@
 ﻿using Heurystyka.Application;
+using Heurystyka.Domain;
 using Heurystyka.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
@@ -13,14 +14,21 @@ namespace HeurystykaAPI
             _service = new MultipleAlgorithms(dataContext);
         }
         [HttpPost]
-        public async Task<List<string>> ExecuteOptimizationAsync([FromBody] BestRequest request)
+        public async Task<ReportMultiple> ExecuteOptimizationAsync([FromBody] BestRequest request)
         {
             return await _service.ExecuteOptimizationAsync(request); ;
         }
-        [HttpGet]
-        public List<string> Report()
+        [HttpGet("raport")]
+        public IActionResult Report()
         {
-            return _service.reports;
+            if (_service.Report != null) return Ok(_service.Report);
+            return NoContent();
+
+        }
+        [HttpGet("status")]
+        public IActionResult Status()
+        {
+            return Ok(_service.state);
 
         }
     }

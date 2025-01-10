@@ -8,6 +8,8 @@ namespace Heurystyka.Infrastructure
     {
         public DataContext(DbContextOptions options) :base(options) { }
         public DbSet<AlgorithmResult> AlgorithmResults { get; set; }
+        public DbSet<ReportMultiple> ReportMultiples { get; set; }
+
         public DbSet<AlgorithmParameter> AlgorithmParameters { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -25,6 +27,7 @@ namespace Heurystyka.Infrastructure
 
             modelBuilder.Entity<AlgorithmParameter>()
                 .ToTable("AlgorithmParameters");
+            modelBuilder.Entity<ReportMultiple>().OwnsMany(e => e.Reports);
         }
     }
 }
