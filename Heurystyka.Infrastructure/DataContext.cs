@@ -11,6 +11,7 @@ namespace Heurystyka.Infrastructure
         public DbSet<ReportMultiple> ReportMultiples { get; set; }
 
         public DbSet<AlgorithmParameter> AlgorithmParameters { get; set; }
+        public DbSet<ReportSingle> ReportSingles { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -24,10 +25,13 @@ namespace Heurystyka.Infrastructure
 
             modelBuilder.Entity<AlgorithmResult>()
                 .ToTable("AlgorithmResults");
-
             modelBuilder.Entity<AlgorithmParameter>()
-                .ToTable("AlgorithmParameters");
-            modelBuilder.Entity<ReportMultiple>().OwnsMany(e => e.Reports);
+    .ToTable("AlgorithmParameters");
+
+            modelBuilder.Entity<ReportMultiple>().HasMany(ar => ar.Reports).WithOne().OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ReportSingle>().ToTable("ReportMultiple");
+            modelBuilder.Entity<ReportSingle>().ToTable("ReportSingle");
+
         }
     }
 }

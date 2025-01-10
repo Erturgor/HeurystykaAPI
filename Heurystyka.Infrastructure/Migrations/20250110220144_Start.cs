@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Heurystyka.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddFieldsChange : Migration
+    public partial class Start : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -60,16 +60,16 @@ namespace Heurystyka.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    ReportMultipleId = table.Column<Guid>(type: "TEXT", nullable: false),
                     XBest = table.Column<string>(type: "TEXT", nullable: false),
                     FBest = table.Column<double>(type: "REAL", nullable: false),
                     AlgorithmName = table.Column<string>(type: "TEXT", nullable: false),
                     AlgorithmFunction = table.Column<string>(type: "TEXT", nullable: false),
-                    Parameters = table.Column<string>(type: "TEXT", nullable: true)
+                    Parameters = table.Column<string>(type: "TEXT", nullable: true),
+                    ReportMultipleId = table.Column<Guid>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ReportSingle", x => new { x.ReportMultipleId, x.Id });
+                    table.PrimaryKey("PK_ReportSingle", x => x.Id);
                     table.ForeignKey(
                         name: "FK_ReportSingle_ReportMultiples_ReportMultipleId",
                         column: x => x.ReportMultipleId,
@@ -82,6 +82,11 @@ namespace Heurystyka.Infrastructure.Migrations
                 name: "IX_AlgorithmParameters_AlgorithmResultId",
                 table: "AlgorithmParameters",
                 column: "AlgorithmResultId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReportSingle_ReportMultipleId",
+                table: "ReportSingle",
+                column: "ReportMultipleId");
         }
 
         /// <inheritdoc />
