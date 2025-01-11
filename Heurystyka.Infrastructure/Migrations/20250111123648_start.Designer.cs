@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Heurystyka.Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250110220144_Start")]
-    partial class Start
+    [Migration("20250111123648_start")]
+    partial class start
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
