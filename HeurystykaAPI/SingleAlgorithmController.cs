@@ -10,28 +10,24 @@ namespace HeurystykaAPI
     public class SingleAlgorithmController : BaseApiController
     {
         private readonly SingleAlgorithm _service;
-
-        public SingleAlgorithmController(DataContext dataContext)
+        private readonly StateMonitor _stateMonitor;
+        public SingleAlgorithmController(StateMonitor stateMonitor,DataContext dataContext)
         {
-            _service = new SingleAlgorithm(dataContext);
+            _service = new SingleAlgorithm(dataContext,stateMonitor);
+            _stateMonitor = stateMonitor;
         }
         [HttpPost]
         public async Task<ReportMultiple> ExecuteOptimizationAsync([FromBody] OptimizationRequest request)
         {
-            return await _service.ExecuteOptimizationAsync(request); 
+            var a = await _service.ExecuteOptimizationAsync(request);
+            return a;
         }
-        [HttpGet("raport")]
-        public IActionResult Report()
-        {
-            if(_service.Report != null) return Ok(_service.Report);
-            return NoContent();
-            
-        }
-        [HttpGet("status")]
-        public IActionResult Status()
-        {
-            return Ok(_service.state);
 
+        [HttpGet("status")]
+        public ActionResult<string> GetState()
+        {
+            return Ok(_stateMonitor.currentState);
         }
+
     }
 }

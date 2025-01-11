@@ -19,21 +19,19 @@ namespace Heurystyka.Application
     public class SingleAlgorithm
     {
         private readonly DataContext dataContext;
-        public string state { get; set; }
-        public ReportMultiple Report { get; set; }
-        public SingleAlgorithm (DataContext dataContext)
+        private readonly StateMonitor _stateMonitor;
+        public ReportMultiple Report { get; set; } = new ReportMultiple();
+        public SingleAlgorithm (DataContext dataContext, StateMonitor stateMonitor)
         {
             this.dataContext = dataContext;
+            _stateMonitor = stateMonitor;
         }
         public async Task<ReportMultiple> ExecuteOptimizationAsync(OptimizationRequest request)
         {
-            state = "Start";
+            _stateMonitor.UpdateState("Start");
             await EnsureMaxReportsLimitAsync();
-            Report = new ReportMultiple
-            {
-                CreatedAt = DateTime.UtcNow,
-                Reports = new List<ReportSingle>()
-            };
+            Report.CreatedAt  = DateTime.UtcNow;
+            Report.Reports = new List<ReportSingle>();
             await dataContext.ReportMultiples.AddAsync(Report);
             await dataContext.SaveChangesAsync();
 
@@ -61,7 +59,7 @@ namespace Heurystyka.Application
                     var algorithm = OptionsService.GetAlgorithms()[request.AlgorithmName];
                     for (int i = 0; i < request.repetitions[index]; i++)
                     {
-                        state = $"Obecnie wykonywany: {functionString} dla parametrów: {string.Join(", ", combination)} Powtórzenie nr.{i+1}";
+                        _stateMonitor.UpdateState($"Obecnie wykonywany: {functionString} dla parametrów: {string.Join(", ", combination)} Powtórzenie nr.{i+1}");
                         var result = await Task.Run(() => algorithm.Solve(
                             fitnessFunction,
                             ConvertTo2DArray(domain),
@@ -88,7 +86,7 @@ namespace Heurystyka.Application
                 }
                
             }
-            state = "Koniec";
+            _stateMonitor.UpdateState("Koniec");
             return Report;
         }
 
@@ -152,6 +150,7 @@ namespace Heurystyka.Application
                 await dataContext.SaveChangesAsync();
             }
         }
+
     }
 
 }

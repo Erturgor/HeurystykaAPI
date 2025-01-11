@@ -9,27 +9,22 @@ namespace HeurystykaAPI
     public class MultipleAlgorithmsController : BaseApiController
     {
         private readonly MultipleAlgorithms _service;
-        public MultipleAlgorithmsController(DataContext dataContext)
+        private readonly StateMonitor _stateMonitor;
+        public MultipleAlgorithmsController(DataContext dataContext, StateMonitor stateMonitor)
         {
-            _service = new MultipleAlgorithms(dataContext);
+            _service = new MultipleAlgorithms(dataContext, stateMonitor);
+            _stateMonitor = stateMonitor;
         }
         [HttpPost]
         public async Task<ReportMultiple> ExecuteOptimizationAsync([FromBody] BestRequest request)
         {
             return await _service.ExecuteOptimizationAsync(request); ;
         }
-        [HttpGet("raport")]
-        public IActionResult Report()
-        {
-            if (_service.Report != null) return Ok(_service.Report);
-            return NoContent();
 
-        }
         [HttpGet("status")]
-        public IActionResult Status()
+        public ActionResult<string> GetState()
         {
-            return Ok(_service.state);
-
+            return Ok(_stateMonitor.currentState);
         }
     }
 }

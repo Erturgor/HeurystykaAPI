@@ -1,4 +1,5 @@
 ﻿using Heurystyka.Domain;
+using Heurystyka.Domain.Wymagania;
 using Heurystyka.Infrastructure;
 using iText.Commons.Actions.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -14,16 +15,17 @@ namespace Heurystyka.Application
     public class MultipleAlgorithms
     {
         private readonly DataContext dataContext;
-        public string state { get; set; }
+        private readonly StateMonitor _stateMonitor;
         public ReportMultiple Report { get; set; }
-        public MultipleAlgorithms(DataContext dataContext)
+        public MultipleAlgorithms(DataContext dataContext, StateMonitor stateMonitor)
         {
             this.dataContext = dataContext;
+            _stateMonitor = stateMonitor;
         }
 
         public async Task<ReportMultiple> ExecuteOptimizationAsync(BestRequest request)
         {
-            state = "Start";
+            _stateMonitor.UpdateState("Start");
             await EnsureMaxReportsLimitAsync();
             Report = new ReportMultiple
             {
@@ -43,7 +45,7 @@ namespace Heurystyka.Application
                 }
                 for (int i = 0; i < request.repetitions[index]; i++)
                 {
-                    state = $"Obecnie wykonywany: {functionString} dla parametrów: {string.Join(", ", parameters)} Powtórzenie nr.{i + 1}";
+                    _stateMonitor.UpdateState($"Obecnie wykonywany: {functionString} dla parametrów:  {string.Join(", ", parameters)} Powtórzenie nr.{i + 1}");
                     var result = await Task.Run(() => algorithm.Solve(
                         fitnessFunction,
                         ConvertTo2DArray(request.domain),
@@ -68,7 +70,7 @@ namespace Heurystyka.Application
                 await UpdateReportAsync(Report);
 
             }
-            state = "Koniec";
+            _stateMonitor.UpdateState("Koniec");
             return Report;
         }
         static double[,] ConvertTo2DArray(double[][] jagged)

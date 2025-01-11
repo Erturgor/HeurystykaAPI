@@ -26,19 +26,36 @@ namespace HeurystykaAPI
             return Ok(result);
         }
         [HttpGet("Raporty")]
-        public async Task<IActionResult> GetAllAlgorithmResults()
+        public async Task<ActionResult<List<ReportMultiple>>> GetAllAlgorithmResults()
         {
-            var algorithmResults = await dataContext.AlgorithmResults
-                .Include(ar => ar.Parameters)  
+            var Report = await dataContext.ReportMultiples
+                .OrderByDescending(ar => ar.CreatedAt)
+                .Include(ar => ar.Reports)  
                 .ToListAsync(); 
 
       
-            if (algorithmResults == null || !algorithmResults.Any())
+            if (Report == null || !Report.Any())
             {
                 return NoContent(); 
             }
 
-            return Ok(algorithmResults);
+            return Ok(Report);
+        }
+        [HttpGet("RaportOstatni")]
+        public async Task<ActionResult<ReportMultiple>> GetReport()
+        {
+            var Report = await dataContext.ReportMultiples
+                .OrderByDescending(ar => ar.CreatedAt)
+                .Include(ar => ar.Reports).FirstOrDefaultAsync();
+
+
+
+            if (Report == null)
+            {
+                return NoContent();
+            }
+
+            return Ok(Report);
         }
 
         [HttpPost]
