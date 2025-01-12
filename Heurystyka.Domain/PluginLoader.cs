@@ -39,10 +39,9 @@ namespace Heurystyka.Domain
                     {
 
                         {
-
                             var instance = Activator.CreateInstance(type);
                             dynamic fc = instance as IOptimizationAlgorithm ?? (dynamic)instance;
-                            algorithms[type.Name] = fc;
+                            algorithms[type.Name] = (IOptimizationAlgorithm) fc;
                         }
 
                     }
@@ -51,6 +50,7 @@ namespace Heurystyka.Domain
                 {
                     Console.WriteLine($"Error loading algorithm from {file}: {ex.Message}");
                 }
+
             }
 
             return algorithms;
@@ -83,6 +83,7 @@ namespace Heurystyka.Domain
                             var instance = Activator.CreateInstance(type);
                             dynamic fc = instance as ITestFunction ?? (dynamic)instance;
                             fitnessFunction fitness = new fitnessFunction((double[] args) => fc.Evaluate(args));
+                            var a = (ITestFunction)fc;
                             testFunctions[type.Name] = fitness;
                         }
 
