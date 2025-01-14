@@ -6,9 +6,14 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.Loader;
+using Heurystyka.Domain.Wymagania.Algorithms;
 
 namespace Heurystyka.Domain
 {
+
+
+
     public class PluginLoader
     {
 
@@ -26,22 +31,26 @@ namespace Heurystyka.Domain
             {
                 try
                 {
-                    var assembly = Assembly.LoadFrom(file);
-                    var types = assembly.GetTypes()
-                        .Where(t => typeof(IOptimizationAlgorithm).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
+                    var assembly = Assembly.LoadFrom(Path.GetFullPath(file));
+                    var types = assembly.GetTypes().Where(type => type.GetInterfaces().Any(k => k.Name == "IOptimizationAlgorithm")).ToList();
+
 
                     foreach (var type in types)
                     {
-                        if (Activator.CreateInstance(type) is IOptimizationAlgorithm algorithm)
+
                         {
-                            algorithms[type.Name] = algorithm;
+                            var instance = Activator.CreateInstance(type);
+                            dynamic fc = instance as IOptimizationAlgorithm ?? (dynamic)instance;
+                            algorithms[type.Name] = (IOptimizationAlgorithm) fc;
                         }
+
                     }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Error loading algorithm from {file}: {ex.Message}");
                 }
+
             }
 
             return algorithms;
@@ -59,19 +68,27 @@ namespace Heurystyka.Domain
 
             foreach (var file in dllFiles)
             {
-                try
+                    try
                 {
-                    var assembly = Assembly.LoadFrom(file);
-                    var types = assembly.GetTypes()
-                        .Where(t => typeof(ITestFunction).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
+                    var assembly = Assembly.LoadFrom(Path.GetFullPath(file));
+                    var types =  assembly.GetTypes().Where(type => type.GetInterfaces().Any(k => k.Name == "ITestFunction")).ToList();
+
+
 
                     foreach (var type in types)
                     {
-                        if (Activator.CreateInstance(type) is ITestFunction testFunction)
+                       
                         {
-                            testFunctions[type.Name] = testFunction.Evaluate;
+
+                            var instance = Activator.CreateInstance(type);
+                            dynamic fc = instance as ITestFunction ?? (dynamic)instance;
+                            fitnessFunction fitness = new fitnessFunction((double[] args) => fc.Evaluate(args));
+                            var a = (ITestFunction)fc;
+                            testFunctions[type.Name] = fitness;
                         }
+
                     }
+
                 }
                 catch (Exception ex)
                 {
@@ -82,4 +99,5 @@ namespace Heurystyka.Domain
             return testFunctions;
         }
     }
+
 }

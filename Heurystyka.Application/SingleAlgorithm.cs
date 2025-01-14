@@ -1,5 +1,8 @@
 ﻿using Heurystyka.Domain;
 using Heurystyka.Domain.Wymagania;
+using Heurystyka.Infrastructure;
+using iText.Commons.Actions.Contexts;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -9,15 +12,29 @@ using System.Reflection.Metadata;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Heurystyka.Application
 {
     public class SingleAlgorithm
     {
-        public List<string> reports { get; set; } = new List<string>();
-        public async Task<List<string>> ExecuteOptimizationAsync(OptimizationRequest request)
+        private readonly DataContext dataContext;
+        private readonly StateMonitor _stateMonitor;
+        public ReportMultiple Report { get; set; } = new ReportMultiple();
+        public SingleAlgorithm (DataContext dataContext, StateMonitor stateMonitor)
         {
-            reports.Clear();
+            this.dataContext = dataContext;
+            _stateMonitor = stateMonitor;
+        }
+        public async Task<ReportMultiple> ExecuteOptimizationAsync(OptimizationRequest request)
+        {
+            _stateMonitor.UpdateState("Start");
+            await EnsureMaxReportsLimitAsync();
+            Report.CreatedAt  = DateTime.UtcNow;
+            Report.Reports = new List<ReportSingle>();
+            await dataContext.ReportMultiples.AddAsync(Report);
+            await dataContext.SaveChangesAsync();
+
             foreach (var (functionString, index) in request.TestFunctionNames.Select((func, idx) => (func, idx)))
             {
                 fitnessFunction fitnessFunction = OptionsService.GetTestFunctionNames()[functionString];
@@ -37,35 +54,50 @@ namespace Heurystyka.Application
 
                 foreach (var combination in cartesianProduct)
                 {
+                    var results = new List<double>();
+                    var xbestList = new List<double[]>();
                     var algorithm = OptionsService.GetAlgorithms()[request.AlgorithmName];
-                    var result = await Task.Run(() => algorithm.Solve(
-                        fitnessFunction,
-                        ConvertTo2DArray(domain),
-                        request.Size,
-                        request.Iteration,
-                        request.Dimensions,
-                        request.load,
-                        combination.ToArray()));
-
-                    lock (reports)
+                    for (int i = 0; i < request.repetitions[index]; i++)
                     {
-                        string parametersAsString = string.Join(" ", combination.Select(p => p.ToString()));
-                        reports.Add($"{functionString} {request.AlgorithmName} {parametersAsString} {algorithm.stringReportGenerator()}\n");
+                        _stateMonitor.UpdateState($"Obecnie wykonywany: {functionString} dla parametrów: {string.Join(", ", combination)} Powtórzenie nr.{i+1}");
+                        var result = await Task.Run(() => algorithm.Solve(
+                            fitnessFunction,
+                            ConvertTo2DArray(domain),
+                            request.Size,
+                            request.Iteration,
+                            request.Dimensions,
+                            request.load,
+                            combination.ToArray()));
+                        results.Add(result);
+                        xbestList.Add(algorithm.XBest);
                     }
+                    int bestIndex = results.IndexOf(results.Min());
+                    double[] xBest = xbestList[bestIndex];
+                    var reportSingle = new ReportSingle
+                    {
+                        XBest = string.Join(", ", xBest),
+                        FBest = results[bestIndex],
+                        Parameters = string.Join(", ", combination),
+                        AlgorithmName = request.AlgorithmName,
+                        AlgorithmFunction = functionString
+                    };
+                    Report.Reports.Add(reportSingle);
+                    await UpdateReportAsync(Report);
                 }
+               
             }
-            return reports;
+            _stateMonitor.UpdateState("Koniec");
+            return Report;
         }
 
         static IEnumerable<IEnumerable<double>> CartesianProduct(List<IEnumerable<double>> sets)
         {
-            // Base case: If only one set is left, return it
             if (sets.Count == 1)
             {
                 return sets[0].Select(item => new[] { item });
             }
 
-            // Recursive step: Take the first set and combine it with the Cartesian product of the rest
+
             var firstSet = sets[0];
             var restProduct = CartesianProduct(sets.Skip(1).ToList());
 
@@ -92,6 +124,33 @@ namespace Heurystyka.Application
 
             return result;
         }
+        private async Task EnsureMaxReportsLimitAsync()
+        {
+            var reportsToDelete = await dataContext.ReportMultiples
+                .OrderByDescending(r => r.CreatedAt)
+                .Skip(10)
+                .ToListAsync();
+
+            if (reportsToDelete.Any())
+            {
+                dataContext.ReportMultiples.RemoveRange(reportsToDelete);
+                await dataContext.SaveChangesAsync();
+            }
+        }
+        private async Task UpdateReportAsync(ReportMultiple reportMultiple)
+        {
+            var existingReport = await dataContext.ReportMultiples
+                .Include(r => r.Reports)
+                .FirstOrDefaultAsync(r => r.CreatedAt == reportMultiple.CreatedAt);
+
+            if (existingReport != null)
+            {
+                existingReport.Reports = reportMultiple.Reports;
+                dataContext.ReportMultiples.Update(existingReport);
+                await dataContext.SaveChangesAsync();
+            }
+        }
+
     }
 
 }

@@ -1,20 +1,21 @@
 ﻿using Heurystyka.Domain;
 using Heurystyka.Infrastructure;
+using iText.Commons.Actions.Contexts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Runtime.CompilerServices;
 
 namespace HeurystykaAPI
 {
-    public class BestParametersController : BaseApiController
+    public class DatabaseController : BaseApiController
     {
         private readonly DataContext dataContext;
-        public BestParametersController(DataContext dataContext)
+        public DatabaseController(DataContext dataContext)
         {
             this.dataContext = dataContext;
         }
 
-        [HttpGet]
+        [HttpGet("Parametry")]
         public async Task<ActionResult<AlgorithmResult>> GetParameters(string name)
         {
             var result = await dataContext.AlgorithmResults.Include(ar => ar.Parameters).FirstOrDefaultAsync(ar => ar.AlgorithmName == name);
@@ -23,6 +24,38 @@ namespace HeurystykaAPI
                 return NotFound("Algorithm result not found.");
             }
             return Ok(result);
+        }
+        [HttpGet("Raporty")]
+        public async Task<ActionResult<List<ReportMultiple>>> GetAllAlgorithmResults()
+        {
+            var Report = await dataContext.ReportMultiples
+                .OrderByDescending(ar => ar.CreatedAt)
+                .Include(ar => ar.Reports)  
+                .ToListAsync(); 
+
+      
+            if (Report == null || !Report.Any())
+            {
+                return NoContent(); 
+            }
+
+            return Ok(Report);
+        }
+        [HttpGet("RaportOstatni")]
+        public async Task<ActionResult<ReportMultiple>> GetReport()
+        {
+            var Report = await dataContext.ReportMultiples
+                .OrderByDescending(ar => ar.CreatedAt)
+                .Include(ar => ar.Reports).FirstOrDefaultAsync();
+
+
+
+            if (Report == null)
+            {
+                return NoContent();
+            }
+
+            return Ok(Report);
         }
 
         [HttpPost]

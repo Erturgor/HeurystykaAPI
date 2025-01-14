@@ -1,3 +1,4 @@
+using Heurystyka.Application;
 using Heurystyka.Domain;
 using Heurystyka.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,7 @@ builder.Services.AddCors(opt =>
         policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000"); //Dodac tam localhosta ktoregos
     });
 });
+builder.Services.AddSingleton<StateMonitor>();
 var app = builder.Build();
 Configuration.LoadPlugins();
 

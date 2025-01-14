@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Heurystyka.Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250101172525_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250111123648_start")]
+    partial class start
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -58,6 +58,54 @@ namespace Heurystyka.Infrastructure.Migrations
                     b.ToTable("AlgorithmResults", (string)null);
                 });
 
+            modelBuilder.Entity("Heurystyka.Domain.ReportMultiple", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ReportMultiples");
+                });
+
+            modelBuilder.Entity("Heurystyka.Domain.ReportSingle", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AlgorithmFunction")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AlgorithmName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("FBest")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("Parameters")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("ReportMultipleId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("XBest")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReportMultipleId");
+
+                    b.ToTable("ReportSingle", (string)null);
+                });
+
             modelBuilder.Entity("Heurystyka.Domain.AlgorithmParameter", b =>
                 {
                     b.HasOne("Heurystyka.Domain.AlgorithmResult", null)
@@ -66,9 +114,22 @@ namespace Heurystyka.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
+            modelBuilder.Entity("Heurystyka.Domain.ReportSingle", b =>
+                {
+                    b.HasOne("Heurystyka.Domain.ReportMultiple", null)
+                        .WithMany("Reports")
+                        .HasForeignKey("ReportMultipleId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("Heurystyka.Domain.AlgorithmResult", b =>
                 {
                     b.Navigation("Parameters");
+                });
+
+            modelBuilder.Entity("Heurystyka.Domain.ReportMultiple", b =>
+                {
+                    b.Navigation("Reports");
                 });
 #pragma warning restore 612, 618
         }

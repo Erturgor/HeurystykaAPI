@@ -276,7 +276,6 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
             {
                 readed = readFile();
             }
-            readed = readFile();
             if (!readed) { generateParticles(); currentIteration = 1; }
             while (currentIteration <= iteration)
             {

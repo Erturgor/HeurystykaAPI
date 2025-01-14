@@ -1,5 +1,6 @@
 ﻿using Heurystyka.Application;
 using Heurystyka.Domain;
+using Heurystyka.Infrastructure;
 using iText.Layout.Tagging;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,20 +10,24 @@ namespace HeurystykaAPI
     public class SingleAlgorithmController : BaseApiController
     {
         private readonly SingleAlgorithm _service;
-
-        public SingleAlgorithmController()
+        private readonly StateMonitor _stateMonitor;
+        public SingleAlgorithmController(StateMonitor stateMonitor,DataContext dataContext)
         {
-            _service = new SingleAlgorithm();
+            _service = new SingleAlgorithm(dataContext,stateMonitor);
+            _stateMonitor = stateMonitor;
         }
         [HttpPost]
-        public async Task<List<string>> ExecuteOptimizationAsync([FromBody] OptimizationRequest request)
+        public async Task<ReportMultiple> ExecuteOptimizationAsync([FromBody] OptimizationRequest request)
         {
-            return await _service.ExecuteOptimizationAsync(request); 
+            var a = await _service.ExecuteOptimizationAsync(request);
+            return a;
         }
-        [HttpGet]
-        public List<string> Report()
+
+        [HttpGet("status")]
+        public ActionResult<string> GetState()
         {
-            return  _service.reports;
+            return Ok(_stateMonitor.currentState);
         }
+
     }
 }
