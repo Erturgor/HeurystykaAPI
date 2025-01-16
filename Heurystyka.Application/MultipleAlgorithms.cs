@@ -16,7 +16,7 @@ namespace Heurystyka.Application
     {
         private readonly DataContext dataContext;
         private readonly StateMonitor _stateMonitor;
-        public ReportMultiple Report { get; set; }
+        public ReportMultiple Report { get; set; } = new ReportMultiple();
         public MultipleAlgorithms(DataContext dataContext, StateMonitor stateMonitor)
         {
             this.dataContext = dataContext;
