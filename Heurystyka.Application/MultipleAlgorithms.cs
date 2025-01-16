@@ -27,11 +27,10 @@ namespace Heurystyka.Application
         {
             _stateMonitor.UpdateState("Start");
             await EnsureMaxReportsLimitAsync();
-            Report = new ReportMultiple
-            {
-                CreatedAt = DateTime.UtcNow,
-                Reports = new List<ReportSingle>()
-            };
+            Report.CreatedAt = DateTime.UtcNow;
+            Report.Reports = new List<ReportSingle>();
+            await dataContext.ReportMultiples.AddAsync(Report);
+            await dataContext.SaveChangesAsync();
             foreach (var (functionString, index) in request.AlgorithmNames.Select((func, idx) => (func, idx)))
             {
                 var results = new List<double>();

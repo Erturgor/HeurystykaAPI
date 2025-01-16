@@ -44,9 +44,9 @@ namespace HeurystykaAPI
         [HttpGet("RaportOstatni")]
         public async Task<ActionResult<ReportMultiple>> GetReport()
         {
-            var Report = await dataContext.ReportMultiples
+            var Report =  await dataContext.ReportMultiples
                 .OrderByDescending(ar => ar.CreatedAt)
-                .Include(ar => ar.Reports).FirstOrDefaultAsync();
+                .Include(ar => ar.Reports).ToListAsync();
 
 
 
@@ -55,7 +55,7 @@ namespace HeurystykaAPI
                 return NoContent();
             }
 
-            return Ok(Report);
+            return Ok(Report[0]);
         }
 
         [HttpPost]
