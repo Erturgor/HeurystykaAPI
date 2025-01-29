@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 public class Algorytm : IOptimizationAlgorithm
     {
 
-        public string Name { get; set; } = "Algorytm";
+        public string Name { get; set; } = "AlgorytmTest";
         public double[] XBest { get; set; }
         public double FBest { get; set; }
         public int NumberOfEvaluationFitnessFunction { get; set; }
