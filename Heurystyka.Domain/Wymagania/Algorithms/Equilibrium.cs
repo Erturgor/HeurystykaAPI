@@ -150,7 +150,7 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
         private void checkFitness()
         {
 
-            for (int i = 0; i < dimensions; i++)
+            for (int i = 0; i < size; i++)
             {
                 if (fun(particles[i]) < fun(equilibrumPool[0]))
                 {
@@ -203,7 +203,7 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
         }
         private void memorySave()
         {
-            for (int i = 0; i < dimensions; i++)
+            for (int i = 0; i < size; i++)
             {
                 if (fun(particles[i]) > fun(oldParticles[i]))
                 {
