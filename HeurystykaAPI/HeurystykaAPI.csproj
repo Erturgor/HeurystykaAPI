@@ -20,9 +20,4 @@
     <ProjectReference Include="..\Heurystyka.Application\Heurystyka.Application.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Algorytmy\" />
-    <Folder Include="Funkcje\" />
-  </ItemGroup>
-
 </Project>

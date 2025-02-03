@@ -1,20 +1,24 @@
 ﻿using Heurystyka.Domain;
 using Heurystyka.Domain.Wymagania;
 using Heurystyka.Domain.Wymagania.Algorithms;
+using TSFDE_fractional_boundary_condition;
 
 namespace Heurystyka.Domain
 {
     public delegate double fitnessFunction(double[] arg);
+
     public class Configuration
     {
-public static Dictionary<string,fitnessFunction> BuiltInTestFunctions { get; } = new()
+        private static readonly TSFDE_fractional_boundary tsfde_inv = new TSFDE_fractional_boundary();
+        public static Dictionary<string,fitnessFunction> BuiltInTestFunctions { get; } = new()
     {
         { "Beale", Heurystyka.Domain.Wymagania.Funkcje.Beale },
         { "Rosenbrock", Heurystyka.Domain.Wymagania.Funkcje.Rosenbrock },
         { "Rastrigin", Heurystyka.Domain.Wymagania.Funkcje.Rastrigin },
         { "HimmelBlau", Heurystyka.Domain.Wymagania.Funkcje.HimmelBlau },
         { "Bukin", Heurystyka.Domain.Wymagania.Funkcje.Bukin },
-        { "Sphere", Heurystyka.Domain.Wymagania.Funkcje.Sphere }
+        { "Sphere", Heurystyka.Domain.Wymagania.Funkcje.Sphere },
+        {"TSFDE", tsfde_inv.fintnessFunction}
     };
 
     public static Dictionary<string, IOptimizationAlgorithm> BuiltInAlgorithms { get; } = new()

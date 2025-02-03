@@ -39,6 +39,7 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
         List<double[]> equilibrumPool;
         List<double[]> particles;
         List<double[]> oldParticles;//Czastki pamietaja swoje jedno polozenie wczesniej
+        List<double> funEquilibrum;
         public Equilibrium()
         {
             ParamsInfo = new ParamInfo[3];
@@ -113,6 +114,7 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
             equilibrumPool = new List<double[]>();
             particles = new List<double[]>();
             oldParticles = new List<double[]>();
+            funEquilibrum = new List<double>();
             Random rd = new Random();
             for (int i = 0; i < size; i++)
             {
@@ -128,8 +130,9 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
                 double[] equilibrum = new double[dimensions];
                 for (int j = 0; j < dimensions; j++)
                 {
-                    equilibrum[j] = Math.Pow(10, 15);
+                    equilibrum[j] = Math.Pow(10, 5);
                 }
+                funEquilibrum.Add(Math.Pow(10, 15));
                 equilibrumPool.Add(equilibrum);
             }
             oldParticles = copy();//kopiujemy poprzedni wynik na poczatku po prostu to samo
@@ -152,32 +155,36 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
 
             for (int i = 0; i < size; i++)
             {
-                if (fun(particles[i]) < fun(equilibrumPool[0]))
+                if (fun(particles[i]) < funEquilibrum[0])
                 {
                     var temp = equilibrumPool[0];
                     equilibrumPool[0] = particles[i];
                     particles[i] = temp;
+                    funEquilibrum[0] = fun(equilibrumPool[0]);
                     NumberOfEvaluationFitnessFunction++;
                 }
-                else if (fun(particles[i]) < fun(equilibrumPool[1]))
+                else if (fun(particles[i]) < funEquilibrum[1])
                 {
                     var temp = equilibrumPool[1];
                     equilibrumPool[1] = particles[i];
                     particles[i] = temp;
+                    funEquilibrum[1] = fun(equilibrumPool[1]);
                     NumberOfEvaluationFitnessFunction++;
                 }
-                else if (fun(particles[i]) < fun(equilibrumPool[2]))
+                else if (fun(particles[i]) < funEquilibrum[2])
                 {
                     var temp = equilibrumPool[2];
                     equilibrumPool[2] = particles[i];
                     particles[i] = temp;
+                    funEquilibrum[2] = fun(equilibrumPool[2]);
                     NumberOfEvaluationFitnessFunction++;
                 }
-                else if (fun(particles[i]) < fun(equilibrumPool[3]))
+                else if (fun(particles[i]) < funEquilibrum[3])
                 {
                     var temp = equilibrumPool[3];
                     equilibrumPool[3] = particles[i];
                     particles[i] = temp;
+                    funEquilibrum[3] = fun(equilibrumPool[3]);
                     NumberOfEvaluationFitnessFunction++;
 
                 }
@@ -186,6 +193,7 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
             {
                 var average = equilibrumPool[4];
                 average[i] = (equilibrumPool[0][i] + equilibrumPool[1][i] + equilibrumPool[2][i] + equilibrumPool[3][i]) / 4;
+                funEquilibrum[4] = fun(average);
             }
 
 
