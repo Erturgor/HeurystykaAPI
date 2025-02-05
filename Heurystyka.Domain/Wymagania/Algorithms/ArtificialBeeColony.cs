@@ -51,7 +51,6 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
                     NumberOfEvaluationFitnessFunction = state.NumberOfEvaluationFitnessFunction;
 
                     size = state.Hive.Count;
-                    iteration = state.Iteration;
                     dimensions = state.Hive[0].Length;
                     currentIteration = state.Iteration;
 
@@ -324,10 +323,12 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
                     {
                         state.NumberOfEvaluationFitnessFunction = int.Parse(line.Trim());
                     }
+                    line = reader.ReadLine();
                     if (line != null)
                     {
                         state.FBest = double.Parse(line.Trim());
                     }
+                    line = reader.ReadLine();
                     if (line != null)
                     {
                         string[] parts = line.Split(' ');

@@ -39,6 +39,8 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
         List<double[]> equilibrumPool;
         List<double[]> particles;
         List<double[]> oldParticles;//Czastki pamietaja swoje jedno polozenie wczesniej
+        double[] fitnesses;
+        double[] Oldfitnesses;
         List<double> funEquilibrum;
         public Equilibrium()
         {
@@ -66,12 +68,13 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
                     NumberOfEvaluationFitnessFunction = state.NumberOfEvaluationFitnessFunction;
 
                     size = state.Hive.Count;
-                    iteration = state.Iteration;
                     dimensions = state.Hive[0].Length;
                     currentIteration = state.Iteration;
 
                     particles = state.Hive;
+                    fitnesses = state.Fitnesses;
                     oldParticles = copy();
+                    Oldfitnesses = Oldfitnesses = (double[])state.Fitnesses.Clone();
                     equilibrumPool = new List<double[]>();
                     for (int i = 0; i < 5; i++)
                     {
@@ -80,6 +83,7 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
                         {
                             equilibrum[j] = Math.Pow(10, 15);
                         }
+                        funEquilibrum.Add(Math.Pow(10, 15));
                         equilibrumPool.Add(equilibrum);
                     }
                     checkFitness();
@@ -99,7 +103,7 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
         private void writeFile()
         {
             string filePath = "equilibrum.txt";
-            State state = new State(XBest, FBest, currentIteration, null, [], particles, NumberOfEvaluationFitnessFunction);
+            State state = new State(XBest, FBest, currentIteration, fitnesses, [], particles, NumberOfEvaluationFitnessFunction);
             try
             {
                 writer.SaveToFileStateOfAlghoritm(state, "equilibrum.txt");
@@ -115,6 +119,8 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
             particles = new List<double[]>();
             oldParticles = new List<double[]>();
             funEquilibrum = new List<double>();
+            fitnesses = new double[size];
+            Oldfitnesses = new double[size];
             Random rd = new Random();
             for (int i = 0; i < size; i++)
             {
@@ -124,6 +130,7 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
                     particle[j] = domain[j, 0] + rd.NextDouble() * (domain[j, 1] - domain[j, 0]);
                 }
                 particles.Add(particle);
+                fitnesses[i] = fun(particle);
             }
             for (int i = 0; i < 5; i++)
             {
@@ -136,6 +143,7 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
                 equilibrumPool.Add(equilibrum);
             }
             oldParticles = copy();//kopiujemy poprzedni wynik na poczatku po prostu to samo
+            Oldfitnesses = (double[])fitnesses.Clone();
         }
 
         private List<double[]> copy()
@@ -155,38 +163,43 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
 
             for (int i = 0; i < size; i++)
             {
-                if (fun(particles[i]) < funEquilibrum[0])
+                fitnesses[i] = fun(particles[i]);
+                NumberOfEvaluationFitnessFunction++;
+                if (fitnesses[i] < funEquilibrum[0])
                 {
                     var temp = equilibrumPool[0];
                     equilibrumPool[0] = particles[i];
                     particles[i] = temp;
-                    funEquilibrum[0] = fun(equilibrumPool[0]);
-                    NumberOfEvaluationFitnessFunction++;
+                    var temp2 = funEquilibrum[0];
+                    funEquilibrum[0] = fitnesses[i];
+                    fitnesses[i] = temp2;
                 }
-                else if (fun(particles[i]) < funEquilibrum[1])
+                else if (fitnesses[i] < funEquilibrum[1])
                 {
                     var temp = equilibrumPool[1];
                     equilibrumPool[1] = particles[i];
                     particles[i] = temp;
-                    funEquilibrum[1] = fun(equilibrumPool[1]);
-                    NumberOfEvaluationFitnessFunction++;
+                    var temp2 = funEquilibrum[1];
+                    funEquilibrum[1] = fitnesses[i];
+                    fitnesses[i] = temp2;
                 }
-                else if (fun(particles[i]) < funEquilibrum[2])
+                else if (fitnesses[i] < funEquilibrum[2])
                 {
                     var temp = equilibrumPool[2];
                     equilibrumPool[2] = particles[i];
                     particles[i] = temp;
-                    funEquilibrum[2] = fun(equilibrumPool[2]);
-                    NumberOfEvaluationFitnessFunction++;
+                    var temp2 = funEquilibrum[2];
+                    funEquilibrum[2] = fitnesses[i];
+                    fitnesses[i] = temp2;
                 }
-                else if (fun(particles[i]) < funEquilibrum[3])
+                else if (fitnesses[i] < funEquilibrum[3])
                 {
                     var temp = equilibrumPool[3];
                     equilibrumPool[3] = particles[i];
                     particles[i] = temp;
-                    funEquilibrum[3] = fun(equilibrumPool[3]);
-                    NumberOfEvaluationFitnessFunction++;
-
+                    var temp2 = funEquilibrum[3];
+                    funEquilibrum[3] = fitnesses[i];
+                    fitnesses[i] = temp2;
                 }
             }
             for (var i = 0; i < dimensions; i++)
@@ -213,12 +226,14 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
         {
             for (int i = 0; i < size; i++)
             {
-                if (fun(particles[i]) > fun(oldParticles[i]))
+                if (fitnesses[i] > Oldfitnesses[i])
                 {
                     particles[i] = oldParticles[i];
+                    fitnesses[i] = Oldfitnesses[i];
                 }
             }
             oldParticles = copy();
+            Oldfitnesses = (double[])fitnesses.Clone();
         }
         private double[] generateGCP()
         {
@@ -363,8 +378,9 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
                 for (int i = 0; i < state.Hive.Count; i++)
                 {
                     var bee = state.Hive[i];
+                    var fitnessValue = state.Fitnesses[i];
 
-                    writer.WriteLine($"{string.Join(" ", bee)}");
+                    writer.WriteLine($"{string.Join(" ", bee)} {fitnessValue}");
                 }
             }
         }
@@ -391,10 +407,12 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
                     {
                         state.NumberOfEvaluationFitnessFunction = int.Parse(line.Trim());
                     }
+                    line = reader.ReadLine();
                     if (line != null)
                     {
                         state.FBest = double.Parse(line.Trim());
                     }
+                    line = reader.ReadLine();
                     if (line != null)
                     {
                         string[] parts = line.Split(' ');
@@ -408,8 +426,10 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
                     {
                         string[] parts = line.Split(' ');
 
-                        var bee = parts.Take(parts.Length).Select(double.Parse).ToArray();
+                        var bee = parts.Take(parts.Length - 1).Select(double.Parse).ToArray();
+                        var fitnessValue = double.Parse(parts[parts.Length - 1]);
                         state.Hive.Add(bee);
+                        fitnessList.Add(fitnessValue);
                     }
                     state.Fitnesses = fitnessList.ToArray();
                     return state;
