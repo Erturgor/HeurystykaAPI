@@ -324,10 +324,12 @@ namespace Heurystyka.Domain.Wymagania.Algorithms
                     {
                         state.NumberOfEvaluationFitnessFunction = int.Parse(line.Trim());
                     }
+                    line = reader.ReadLine();
                     if (line != null)
                     {
                         state.FBest = double.Parse(line.Trim());
                     }
+                    line = reader.ReadLine();
                     if (line != null)
                     {
                         string[] parts = line.Split(' ');
