@@ -2,6 +2,7 @@
 using Heurystyka.Domain.Wymagania;
 using Heurystyka.Domain.Wymagania.Algorithms;
 using TSFDE_fractional_boundary_condition;
+using ZadanieAA;
 
 namespace Heurystyka.Domain
 {
@@ -10,6 +11,7 @@ namespace Heurystyka.Domain
     public class Configuration
     {
         private static readonly TSFDE_fractional_boundary tsfde_inv = new TSFDE_fractional_boundary();
+        private static readonly ObjectiveFunction objectiveFunction = new ObjectiveFunction();
         public static Dictionary<string,fitnessFunction> BuiltInTestFunctions { get; } = new()
     {
         { "Beale", Heurystyka.Domain.Wymagania.Funkcje.Beale },
@@ -18,7 +20,8 @@ namespace Heurystyka.Domain
         { "HimmelBlau", Heurystyka.Domain.Wymagania.Funkcje.HimmelBlau },
         { "Bukin", Heurystyka.Domain.Wymagania.Funkcje.Bukin },
         { "Sphere", Heurystyka.Domain.Wymagania.Funkcje.Sphere },
-        {"TSFDE", tsfde_inv.fintnessFunction}
+        {"TSFDE", tsfde_inv.fintnessFunction},
+        {"Objective", objectiveFunction.FunkcjaCelu.Wartosc}
     };
 
     public static Dictionary<string, IOptimizationAlgorithm> BuiltInAlgorithms { get; } = new()

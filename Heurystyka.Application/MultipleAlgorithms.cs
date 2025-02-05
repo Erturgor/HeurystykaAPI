@@ -67,7 +67,10 @@ namespace Heurystyka.Application
                 };
                 Report.Reports.Add(reportSingle);
                 await UpdateReportAsync(Report);
+                double mean = results.Average();
+                double stdDev = Math.Sqrt(results.Average(v => Math.Pow(v - mean, 2)));
 
+                await File.AppendAllTextAsync("odchylenie.txt", $"{functionString}: {stdDev}\n");
             }
             _stateMonitor.UpdateState("Koniec");
             return Report;
